@@ -1,0 +1,54 @@
+@startuml Future 2.0 MVP
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+AddElementTag("new", $bgColor="red", $borderColor="#ffffbf")
+AddRelTag("new", $textColor="red", $lineColor="red")
+
+System_Boundary(sys, "Future 2.0") {
+    Container(client, "Клиентский интерфейс оператора")
+    Container(bi, "BI-система")
+
+    ContainerDb(dwh_old, "DWH", "MSQL")
+    ContainerDb(dwh_new, "DWH", "PostgreSQL", $tags="new")
+    ContainerDb(dlh, "DLH", "MinIO, Nessie, Dremio", $tags="new")
+
+    Container(dh, "DataHub", "DataHub Serving", $tags="new")
+    Container(dhi, "DHI", "DataHub Ingestion", $tags="new")
+    Container(dh_web, "Интерфейс витрины данных", "DataHub Frontend", $tags="new")
+
+    Container(esb_old, "Шина данных", "Apache Camel")
+    Container(esb_new, "Шина данных", "Kafka", $tags="new")
+
+    Container(ai, "AI-сервисы", "Python")
+    Container(inner, "Внутренние сервисы")
+    Container(fin, "Финтех сервисы", "Golang, Java")
+
+    Container(ns, "Новые сервисы", $tags="new")
+}
+
+Rel_U(dwh_old, dhi, "", $tags="new")
+Rel_U(dwh_new, dhi, "push+pull", $tags="new")
+Rel_U(dlh, dhi, "", $tags="new")
+
+Rel_R(dhi, dh, "", $tags="new")
+
+Rel_U(dh, bi, "API-интеграция\nGraphQL+REST", $tags="new")
+Rel_U(dh, dh_web, "GraphQL+REST", $tags="new")
+
+Rel_U(ai, esb_old, "")
+Rel_U(fin, esb_old, "")
+Rel_U(inner, esb_old, "")
+Rel_U(esb_old, dwh_old, "")
+
+Rel_U(ai, esb_new, "", $tags="new")
+Rel_U(fin, esb_new, "", $tags="new")
+Rel_U(inner, esb_new, "", $tags="new")
+Rel_U(ns, esb_new, "", $tags="new")
+Rel_U(esb_new, dwh_new, "", $tags="new")
+Rel_U(esb_new, dlh, "", $tags="new")
+
+Rel_L(client, dwh_old, "")
+Rel_L(client, dwh_new, "", $tags="new")
+Rel_L(client, dlh, "", $tags="new")
+
+@enduml
